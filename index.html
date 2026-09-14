@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clelian Hourglass — Scale Space SeedBank</title>
+<style>
+  html, body { margin:0; height:100%; background:#000; overflow:hidden; color:#dfe6f2;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  #cv { position:absolute; inset:0; z-index:1; touch-action:none; }
+  #bgGlow { position:absolute; inset:0; z-index:0; pointer-events:none; filter:blur(40px);
+    opacity:0; width:100vw; height:100vh; mix-blend-mode:screen; transform:translateZ(0); }
+  body.engine-ready #bgGlow { opacity:1; transition:opacity 1.6s; }
+  #cv { opacity:0; }
+  body.engine-ready #cv { opacity:1; transition:opacity 1.6s; }
+  #caption { position:fixed; left:0; right:0; bottom:0; z-index:2; padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    pointer-events:none; font-size:13px; line-height:1.5; letter-spacing:.02em;
+    background:linear-gradient(transparent, rgba(0,0,0,.55)); }
+  #caption .name { font-size:16px; }
+  #caption .by, #caption .id { opacity:.7; }
+  #caption .id { float:right; }
+  #nogpu { position:fixed; inset:0; z-index:3; display:grid; place-items:center; padding:24px; text-align:center;
+    background:#000; }
+  #nogpu[hidden] { display:none; }
+  #nogpu p { max-width:34ch; margin:0 0 12px; }
+  #nogpu .why { opacity:.6; font-size:12px; }
+  #nogpu img { width:min(90vw, 480px); border-radius:6px; margin-bottom:18px; }
+</style>
+</head>
+<body>
+  <canvas id="bgGlow"></canvas>
+  <canvas id="cv"></canvas>
+  <div id="caption"><span class="id"></span><div class="name"></div><div class="by"></div></div>
+  <div id="nogpu" hidden>
+    <div>
+      <img id="fallback" alt="Clelian Hourglass, still image">
+      <p>This grain needs WebGPU to move. Your browser doesn't have it yet, so here's a still.</p>
+      <p class="why"></p>
+    </div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
