@@ -2,9 +2,7 @@
 
 A public registry of *grains* — shared coordinates found in Scale Space — rendered live in the browser.
 
-**This is the proof of concept: one grain, the Clelian Hourglass, on one page.**
-
-Live: `docs/index.html` (GitHub Pages serves from `/docs`).
+Live: https://setzstone.github.io/SeedBank/
 
 ## Layout
 
