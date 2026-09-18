@@ -1,0 +1,46 @@
+name: Submit a grain
+description: Add a coordinate you found in Scale Space to the SeedBank.
+title: "Grain: "
+labels: ["grain"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for bringing one back. Paste your share code, attach at least one screenshot, and a maintainer will review it. Nothing is published until it's approved.
+  - type: textarea
+    id: code
+    attributes:
+      label: Share code
+      description: The full SS1 string from Synthesist or Cymatist. Name, notes and author travel inside it.
+      placeholder: "SS1:..."
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Found in
+      options:
+        - Cymatist
+        - Synthesist
+    validations:
+      required: true
+  - type: textarea
+    id: images
+    attributes:
+      label: Screenshots
+      description: Attach at least one (drag in, paste, or use the attach button). The first becomes the hero. Wide and full-res is best; 1280px or wider.
+      placeholder: Drop images here.
+    validations:
+      required: true
+  - type: input
+    id: video
+    attributes:
+      label: Video (optional)
+      description: A YouTube link.
+      placeholder: https://youtu.be/...
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes (optional)
+      description: Anything you'd want a visitor to know. Only used if the code carries no notes of its own.

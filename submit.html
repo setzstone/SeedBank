@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plant a grain — Scale Space SeedBank</title>
+<style>
+  :root { --accent-rgb: 255, 170, 85; --ink: #e8e2d6; --ink-dim: rgba(232,226,214,.62); --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, monospace; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: #000; color: var(--ink); font-family: var(--mono); }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,200,130,.045) 0 1px, transparent 1px 3px); mix-blend-mode: screen; }
+  main { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: calc(18px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom)); }
+  .mark { font-size: 12px; margin-bottom: 28px; } .mark b { font-weight: 500; color: rgb(var(--accent-rgb)); } .mark a { color: inherit; text-decoration: none; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 6px; }
+  .lede { font-size: 13px; color: var(--ink-dim); line-height: 1.55; margin: 0 0 22px; max-width: 52ch; }
+  label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); margin: 18px 0 8px; }
+  textarea, select { width: 100%; font: inherit; font-size: 12px; color: var(--ink); background: rgba(255,255,255,.04);
+    border: 1px solid rgba(var(--accent-rgb), .25); border-radius: 3px; padding: 10px 12px; }
+  textarea { min-height: 120px; resize: vertical; line-height: 1.45; }
+  textarea:focus, select:focus { outline: none; border-color: rgba(var(--accent-rgb), .7); }
+  .preview { margin-top: 18px; padding: 14px 16px; border: 1px solid rgba(var(--accent-rgb), .18); border-radius: 3px; background: rgba(255,255,255,.02); display: none; }
+  .preview.on { display: block; } .preview .id { font-size: 12px; color: rgb(var(--accent-rgb)); letter-spacing: .06em; }
+  .preview h2 { margin: 2px 0 2px; font-size: 20px; font-weight: 500; } .preview .by { font-size: 12px; color: var(--ink-dim); margin-bottom: 12px; }
+  .coords { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 16px; font-size: 12px; margin: 0; }
+  .coords div { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .coords dt { color: var(--ink-dim); } .coords dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .err { margin-top: 10px; font-size: 12px; color: #ff8a6a; display: none; } .err.on { display: block; }
+  .btn { display: block; width: 100%; text-align: center; margin-top: 22px; padding: 13px 16px; border-radius: 3px; text-decoration: none; font: inherit; font-size: 13px;
+    letter-spacing: .04em; color: rgb(var(--accent-rgb)); background: rgba(var(--accent-rgb), .08); border: 1px solid rgba(var(--accent-rgb), .45); cursor: pointer; }
+  .btn[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+  ol { font-size: 12px; color: var(--ink-dim); line-height: 1.6; padding-left: 18px; margin: 22px 0 0; }
+  ol b { font-weight: 500; color: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark"><a href="./"><b>Scale Space</b> SeedBank</a></div>
+  <h1>Plant a grain</h1>
+  <p class="lede">Found something worth going back to? Paste its share code. If it reads, you'll see it below, and the next step takes you to a form where you attach screenshots.</p>
+
+  <label for="code">Share code</label>
+  <textarea id="code" placeholder="SS1:..." spellcheck="false" autocapitalize="off"></textarea>
+  <div class="err" id="err"></div>
+
+  <label for="src">Found in</label>
+  <select id="src"><option>Cymatist</option><option>Synthesist</option></select>
+
+  <div class="preview" id="preview">
+    <div class="id" id="pv-id"></div>
+    <h2 id="pv-name"></h2>
+    <div class="by" id="pv-by"></div>
+    <dl class="coords" id="pv-coords"></dl>
+  </div>
+
+  <a class="btn" id="go" href="#" aria-disabled="true" target="_blank" rel="noopener">Continue to screenshots →</a>
+
+  <ol>
+    <li>The next page is a GitHub issue form, prefilled with your code. You'll need a GitHub account.</li>
+    <li>Attach <b>at least one screenshot</b> there. The first becomes the hero; wide and full-size is best.</li>
+    <li>Add a YouTube link if you have one, then submit. A maintainer approves it and it appears on the site.</li>
+  </ol>
+</main>
+<script>
+const REPO = 'setzstone/SeedBank';
+const COORD = ['freeEnergy', 'resolution', 'inversion', 'halfLife', 'scaleDepth', 'coherence', 'equilibrium', 'temperature', 'viscosity', 'mass'];
+const LABEL = { freeEnergy: 'free energy', halfLife: 'half-life', scaleDepth: 'scale depth' };
+const HASH_KEYS = [...COORD, 'tempo', 'hue', 'sat', 'lightness', 'opacity', 'trailLen', 'bgGlow', 'bgBlur', 'offsetX', 'offsetY', 'offsetZ', 'billboardOffset'];
+const fmt = v => typeof v === 'number' ? (Number.isInteger(v) ? v.toLocaleString() : +v.toFixed(3)) : String(v);
+function coordHash(pp) {
+  let h = '';
+  for (const k of HASH_KEYS) { const x = pp[k]; if (x === undefined) continue; h += x < 1 ? x.toFixed(2) : x < 100 ? Math.round(x * 10) / 10 : Math.round(x); }
+  let n = 0; for (let i = 0; i < h.length; i++) n = ((n << 5) - n) + h.charCodeAt(i) | 0;
+  return 'SS-' + Math.abs(n).toString(36).toUpperCase().slice(0, 8);
+}
+async function decode(code) {
+  let b64 = code.slice(4).replace(/-/g, '+').replace(/_/g, '/'); b64 += '='.repeat((4 - b64.length % 4) % 4);
+  const bytes = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0));
+  const ds = new DecompressionStream('deflate-raw');
+  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  return JSON.parse(await new Response(stream).text());
+}
+const $ = id => document.getElementById(id);
+let current = null;
+async function check() {
+  const raw = $('code').value, m = raw.match(/SS1:[A-Za-z0-9_-]+/);
+  $('preview').classList.remove('on'); $('err').classList.remove('on'); $('go').setAttribute('aria-disabled', 'true'); current = null;
+  if (!m) { if (raw.trim()) { $('err').textContent = 'That doesn\'t look like a share code. It should start with SS1:'; $('err').classList.add('on'); } return; }
+  try {
+    const pl = await decode(m[0]); const p = pl.p || {};
+    const missing = COORD.filter(k => !Number.isFinite(p[k]));
+    if (missing.length) throw new Error('missing ' + missing.join(', '));
+    current = { code: m[0], pl };
+    $('pv-id').textContent = coordHash({ ...p, ...(pl.v || {}) });
+    $('pv-name').textContent = pl.n || 'Untitled';
+    $('pv-by').textContent = pl.a ? 'found by ' + pl.a : 'no author in the code — your GitHub name will be used';
+    $('pv-coords').innerHTML = COORD.map(k => `<div><dt>${LABEL[k] || k}</dt><dd>${fmt(p[k])}</dd></div>`).join('');
+    $('preview').classList.add('on'); $('go').removeAttribute('aria-disabled'); link();
+  } catch (e) { $('err').textContent = 'Couldn\'t read that code (' + e.message + ').'; $('err').classList.add('on'); }
+}
+function link() {
+  if (!current) return;
+  const q = new URLSearchParams({ template: 'grain.yml', title: 'Grain: ' + (current.pl.n || 'untitled'), code: current.code, source: $('src').value });
+  $('go').href = `https://github.com/${REPO}/issues/new?${q}`;
+}
+let t; $('code').addEventListener('input', () => { clearTimeout(t); t = setTimeout(check, 250); });
+$('src').addEventListener('change', link);
+const pre = new URLSearchParams(location.search).get('code'); if (pre) { $('code').value = pre; check(); }
+</script>
+</body>
+</html>
